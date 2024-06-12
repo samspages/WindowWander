@@ -5,6 +5,7 @@ from screeninfo import get_monitors
 import keyboard
 import time
 import random
+import pyrect
 
 monitor_display = 1
 
@@ -16,11 +17,18 @@ def get_main(monitor_index):
         return None
 
 def window_walk(id, stop):
+    visited = set()
 
-    def drunk_step():
-        dx = random.choice([-1, 0, 1])
-        dy = random.choice([-1, 0, 1])
-        return dx, dy
+    # self-avoidance variation
+    def drunk_step(pos):
+        while True:
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+            random.shuffle(directions)
+            for dx, dy in directions:
+                new_pos = (pos.x + dx, pos.y + dy)
+                if new_pos not in visited:
+                    return dx, dy
+            return 1, 1
 
     os.system("start chrome --new-window --app=https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJtdDNtZ2hndHExaDk0Z3B4NDRhdjh6OTliZGw5N3drZDE5MnhvZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AwNGX4XvvODO8/giphy.webp")
     time.sleep(0.4) # yup
@@ -39,9 +47,10 @@ def window_walk(id, stop):
 
         while True:
             pos = window.topleft
-            dx, dy = drunk_step()
+            dx, dy = drunk_step(pos)
             window.moveTo(pos.x + dx, pos.y + dy)
-            time.sleep(0.08)
+            visited.add((pos.x, pos.y))
+            time.sleep(0.075)
 
             if stop():
                 break
